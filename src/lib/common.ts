@@ -1,0 +1,9 @@
+/** Id for a saved certificate. Falls back when crypto.randomUUID is missing (non-secure http origins). */
+export function newId(): string {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) return crypto.randomUUID();
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+export function errorMessage(e: unknown): string {
+  return e instanceof Error ? e.message : 'Error desconocido';
+}
