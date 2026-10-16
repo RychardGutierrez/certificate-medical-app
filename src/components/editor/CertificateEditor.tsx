@@ -12,7 +12,7 @@ import { PdfPreview } from './PdfPreview';
 import { buildCertificatePdf } from '@/lib/pdf';
 import { certificateFilename, fechaLarga, lugarFecha, todayIso } from '@/lib/format';
 import { downloadFile } from '@/lib/download';
-import { errorMessage, newId } from '@/lib/common';
+import { errorMessage, isTouchDevice, newId } from '@/lib/common';
 import { PHRASES, patientParagraph } from '@/lib/phrases';
 import {
   clearDraft,
@@ -182,8 +182,17 @@ export default function CertificateEditor() {
   }
 
   function handlePrint() {
+    if (!preview || preview.overflow) {
+      toast.error('Corrige el texto antes de imprimir.');
+      return;
+    }
+    // Touch devices show no inline preview, so the PDF opens in its own tab to print from there.
+    if (isTouchDevice()) {
+      window.open(preview.url, '_blank', 'noopener');
+      return;
+    }
     const win = iframeRef.current?.contentWindow;
-    if (!win || !preview || preview.overflow) {
+    if (!win) {
       toast.error('Corrige el texto antes de imprimir.');
       return;
     }

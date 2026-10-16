@@ -1,5 +1,7 @@
 import type { RefObject } from 'react';
-import { Info } from 'lucide-react';
+import { ExternalLink, Info } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { isTouchDevice } from '@/lib/common';
 
 interface Props {
   url: string | null;
@@ -8,8 +10,13 @@ interface Props {
   iframeRef: RefObject<HTMLIFrameElement | null>;
 }
 
-/** Shows the generated PDF in an iframe. Printing is started by the editor's action bar. */
+/**
+ * Shows the generated PDF in an iframe. Touch devices cannot render PDFs inside an iframe,
+ * so they get a button that opens the PDF in a new tab. Printing is started by the editor's action bar.
+ */
 export function PdfPreview({ url, overflow, error, iframeRef }: Props) {
+  const inline = !isTouchDevice();
+
   return (
     <section aria-labelledby="preview-title" className="flex min-w-0 flex-col gap-3 self-start md:sticky md:top-4">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -19,8 +26,15 @@ export function PdfPreview({ url, overflow, error, iframeRef }: Props) {
 
       <div className="rounded-xl border bg-muted p-4">
         <div className="mx-auto aspect-[8.5/11] w-full max-w-xl overflow-hidden rounded-md bg-white shadow-md">
-          {url ? (
+          {url && inline ? (
             <iframe ref={iframeRef} src={url} title="Vista previa del certificado" className="size-full border-0" />
+          ) : url ? (
+            <div className="flex size-full flex-col items-center justify-center gap-4 p-6 text-center">
+              <p className="text-sm text-muted-foreground">Este dispositivo no muestra la vista previa aquí.</p>
+              <Button size="lg" nativeButton={false} render={<a href={url} target="_blank" rel="noopener" />}>
+                <ExternalLink /> Abrir vista previa
+              </Button>
+            </div>
           ) : (
             <div className="flex size-full items-center justify-center text-sm text-muted-foreground">
               Generando vista previa…
